@@ -2,14 +2,14 @@ import { createBrowserRouter, Navigate, RouteObject } from 'react-router-dom';
 
 const staticRoutes: RouteObject[] = [
     {
-        path: '/login',
+        path: '/',
         lazy: async () => ({
             Component: (await import('@/pages/login/index')).default
         })
     },
     {
         path: '*',
-        element: <Navigate to="/login" replace />
+        element: <Navigate to="/" replace />
     }
 ];
 
