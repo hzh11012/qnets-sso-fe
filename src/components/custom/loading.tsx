@@ -1,9 +1,8 @@
 import { LoaderCircle } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+
 import { cn } from '@/lib/utils';
 
 const Loading = ({ className }: any) => {
-    const { t } = useTranslation();
     return (
         <div
             className={cn(
@@ -12,10 +11,10 @@ const Loading = ({ className }: any) => {
             )}
         >
             <LoaderCircle className={cn('h-4 w-4 animate-spin')} />
-            <p className={cn('text-sm ml-2')}>{t('loading')}</p>
+            <p className={cn('text-sm ml-2')}>加载中</p>
         </div>
     );
 };
 Loading.displayName = 'Loading';
 
-export { Loading };
+export default Loading;

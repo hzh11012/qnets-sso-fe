@@ -1,4 +1,5 @@
-import useTheme from '@/hooks/use-theme';
+import React from 'react';
+import { useTheme } from 'next-themes';
 import { Moon, Sun, Tv2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -9,62 +10,26 @@ const themeOptions: Record<string, 'system' | 'light' | 'dark'> = {
     light: 'dark'
 };
 
-const ThemeSwitch = () => {
+interface ThemeSwitchProps {
+    className?: string;
+}
+
+const ThemeSwitch: React.FC<ThemeSwitchProps> = ({ className }) => {
     const { theme, setTheme } = useTheme();
 
     const Icon = theme === 'light' ? Sun : theme === 'dark' ? Moon : Tv2;
-    const darkMode =
-        theme === 'dark' ||
-        (theme === 'system' &&
-            window.matchMedia('(prefers-color-scheme: dark)').matches);
-
-    const handleClick = (e: any) => {
-        const isAppearanceTransition = !window.matchMedia(
-            '(prefers-reduced-motion: reduce)'
-        ).matches;
-
-        if (!isAppearanceTransition) {
-            setTheme(themeOptions[theme]);
-            return;
-        }
-
-        const transition = document.startViewTransition(async () => {
-            setTheme(themeOptions[theme]);
-        });
-
-        const x = e.clientX;
-        const y = e.clientY;
-        const endRadius = Math.hypot(
-            Math.max(x, innerWidth - x),
-            Math.max(y, innerHeight - y)
-        );
-
-        transition.ready.then(() => {
-            const clipPath = [
-                `circle(0px at ${x}px ${y}px)`,
-                `circle(${endRadius}px at ${x}px ${y}px)`
-            ];
-            document.documentElement.animate(
-                {
-                    clipPath: darkMode ? [...clipPath].reverse() : clipPath
-                },
-                {
-                    duration: 400,
-                    easing: 'ease-out',
-                    pseudoElement: darkMode
-                        ? '::view-transition-old(root)'
-                        : '::view-transition-new(root)'
-                }
-            );
-        });
-    };
 
     return (
         <Button
             size="icon"
             variant="ghost"
-            className={cn('rounded-full w-9 h-9')}
-            onClick={handleClick}
+            className={cn(
+                'rounded-full size-10 hover:bg-foreground/15',
+                className
+            )}
+            onClick={() => {
+                theme && setTheme(themeOptions[theme]);
+            }}
         >
             <Icon size={20} />
         </Button>

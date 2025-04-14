@@ -1,234 +1,126 @@
-import Language from '@/components/custom/language';
-import ThemeSwitch from '@/components/custom/theme-switch';
-import Wave from '@/components/custom/wave';
-import { z } from 'zod';
+import React, { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { cn } from '@/lib/utils';
+import { Layout } from '@/components/layout';
 import {
     Card,
     CardContent,
     CardDescription,
+    CardFooter,
     CardHeader,
     CardTitle
 } from '@/components/ui/card';
-import useTheme from '@/hooks/use-theme';
-import { cn, isValidUrl } from '@/lib/utils';
-import { useTranslation } from 'react-i18next';
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormMessage
-} from '@/components/ui/form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { Input } from '@/components/ui/input';
+import { PhoneForm } from '@/pages/login/form';
+import ThemeSwitch from '@/components/custom/theme-switch';
+import { phoneFormSchema } from '@/pages/login/form/schema';
 import { Button } from '@/components/ui/button';
-import useCountDown from '@/hooks/use-count-down';
+import { CodeDialog } from '@/pages/login/form/dialog';
 import { doCode, doLogin } from '@/apis/auth';
-import { useSearchParams } from 'react-router-dom';
+import useCountDown from '@/hooks/use-count-down';
 
-const PHONE_REG = /^1[3456789]\d{9}$/;
-const CODE_REG = /^[0-9]{6}$/;
-
-const Login = () => {
-    const { t } = useTranslation();
-    const { theme } = useTheme();
+const Login: React.FC = () => {
+    const [open, setOpen] = useState(false);
     const { start, count, isDisable } = useCountDown(60);
-    const [searchParams] = useSearchParams();
 
-    const getQueryParam = (paramKey: string) => {
-        return searchParams.get(paramKey);
-    };
-
-    const darkMode =
-        theme === 'dark' ||
-        (theme === 'system' &&
-            window.matchMedia('(prefers-color-scheme: dark)').matches);
-
-    const loginForm = z.object({
-        phone: z
-            .string({
-                required_error: t('login.phone.empty'),
-                invalid_type_error: t('login.phone.type')
-            })
-            .regex(PHONE_REG, {
-                message: t('login.phone.rule')
-            }),
-        code: z
-            .string({
-                required_error: t('login.code.empty'),
-                invalid_type_error: t('login.code.type')
-            })
-            .regex(CODE_REG, {
-                message: t('login.code.rule')
-            })
-    });
-
-    const form = useForm<z.infer<typeof loginForm>>({
-        resolver: zodResolver(loginForm),
+    const phoneForm = useForm<Zod.infer<typeof phoneFormSchema>>({
+        resolver: zodResolver(phoneFormSchema),
         defaultValues: {
-            phone: '',
-            code: ''
-        }
+            phone: ''
+        },
+        mode: 'onSubmit',
+        reValidateMode: 'onSubmit'
     });
-    const phone = form.watch('phone');
-    const code = form.watch('code');
 
-    const handleLogin = async (values: z.infer<typeof loginForm>) => {
-        try {
-            await doLogin(values);
-            const redirectUrl = getQueryParam('redirect');
-            if (redirectUrl && isValidUrl(redirectUrl)) {
-                window.location.href = redirectUrl;
-            }
-        } catch (error) {
-            console.error(error);
-        }
+    const phone = phoneForm.watch('phone');
+
+    const handleClick = async (values: Zod.infer<typeof phoneFormSchema>) => {
+        const { phone } = values;
+        // TODO loading
+        await handleSend(phone);
+        setOpen(true);
     };
 
-    const handleCode = async () => {
-        const isValid = await form.trigger('phone');
-        if (isValid) {
-            try {
-                await doCode({
-                    phone: phone
-                });
-                start();
-            } catch (error) {
-                console.error(error);
-            }
-        }
+    const sendCode = async (phone: string) => {
+        await doCode({ phone });
+    };
+
+    const handleFocus = () => {
+        phoneForm.clearErrors();
+    };
+
+    const handleComplete = async (phone: string, code: string) => {
+        await doLogin({ phone, code });
+        // TODO 跳转
+    };
+
+    const handleSend = async (phone: string) => {
+        await sendCode(phone);
+        start();
     };
 
     return (
-        <div
-            className={cn(
-                'relative w-full h-full flex items-center justify-center'
-            )}
-        >
-            <Wave darkMode={darkMode} />
-            <div
+        <Layout className={cn('min-h-svh flex items-center justify-center')}>
+            <Card
                 className={cn(
-                    'z-20 w-auto min-w-[21.875rem] sm:min-w-96 transition-[min-width] m-auto'
+                    'relative shadow-none sm:border-1 border-0 w-[21.875rem] h-auto p-6 gap-0'
                 )}
             >
-                <Card className="transition-[padding]">
-                    <CardHeader>
-                        <CardTitle
+                <CardHeader className={cn('gap-0 px-0 py-6 pt-0')}>
+                    <CardTitle
+                        className={cn(
+                            'text-2xl flex items-center justify-between w-full mb-10.5'
+                        )}
+                    >
+                        <div
                             className={cn(
-                                'text-2xl flex items-center justify-between w-full'
+                                'flex items-center text-theme text-4xl'
                             )}
                         >
-                            <div
-                                className={cn(
-                                    'flex items-center text-theme-color'
-                                )}
-                            >
-                                <img
-                                    className={cn('block mr-4 w-14 h-14')}
-                                    src="https://cdn.qnets.cn/logo.svg"
-                                    alt="Qnets"
-                                />
-                                {t('login.title')}
-                            </div>
-                            <div className="flex flex-col">
-                                <ThemeSwitch />
-                                <Language />
-                            </div>
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="sm:pt-0">
-                        <CardTitle className={cn('text-theme-color text-lg')}>
-                            {t('login.type.phone')}
-                        </CardTitle>
-                        <CardDescription
-                            className={cn(
-                                'flex flex-col text-theme-color opacity-65 text-sm pt-2'
-                            )}
-                        >
-                            {t('login.type.phone.description')}
-                        </CardDescription>
-                        <Form {...form}>
-                            <form
-                                onSubmit={form.handleSubmit(handleLogin)}
-                                className="space-y-6 pt-9"
-                            >
-                                <FormField
-                                    control={form.control}
-                                    name="phone"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <Input
-                                                    type="phone"
-                                                    autoComplete="off"
-                                                    placeholder="+86"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="code"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <div
-                                                className={cn(
-                                                    'flex w-full items-center'
-                                                )}
-                                            >
-                                                <FormControl>
-                                                    <Input
-                                                        className={cn('flex-1')}
-                                                        type="text"
-                                                        autoComplete="off"
-                                                        placeholder={t(
-                                                            'login.code'
-                                                        )}
-                                                        {...field}
-                                                    />
-                                                </FormControl>
-                                                <Button
-                                                    className={cn(
-                                                        'w-28 ml-4 font-normal'
-                                                    )}
-                                                    disabled={
-                                                        !phone || isDisable
-                                                    }
-                                                    variant="outline"
-                                                    type="button"
-                                                    onClick={handleCode}
-                                                >
-                                                    {isDisable
-                                                        ? t(
-                                                              'login.code.button.resend'
-                                                          ) + `(${count})`
-                                                        : t(
-                                                              'login.code.button.send'
-                                                          )}
-                                                </Button>
-                                            </div>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <Button
-                                    className={cn('w-full')}
-                                    disabled={!phone && !code}
-                                    variant="confirm"
-                                    type="submit"
-                                >
-                                    {t('login.submit')}
-                                </Button>
-                            </form>
-                        </Form>
-                    </CardContent>
-                </Card>
-            </div>
-        </div>
+                            <img
+                                className={cn('block mr-4 size-14')}
+                                src="/logo.svg"
+                                alt="Qnets"
+                            />
+                            Qnets
+                        </div>
+                        <ThemeSwitch />
+                    </CardTitle>
+                    <CardTitle className={cn('text-[1.125rem] mx-2')}>
+                        手机号登录/注册
+                    </CardTitle>
+                    <CardDescription
+                        className={cn('text-[0.875rem] mx-2 mt-3 mb-4')}
+                    >
+                        未注册用户验证后将自动注册并登录
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className={cn('px-0')}>
+                    <PhoneForm form={phoneForm} onFocus={handleFocus} />
+                </CardContent>
+                <CardFooter className={cn('px-0 pt-6')}>
+                    <Button
+                        className={cn('w-full mt-4 bg-theme')}
+                        type="submit"
+                        disabled={!phone}
+                        onClick={phoneForm.handleSubmit(handleClick)}
+                    >
+                        登录
+                    </Button>
+                </CardFooter>
+            </Card>
+            <CodeDialog
+                phone={phone}
+                open={open}
+                onOpenChange={setOpen}
+                countDown={{
+                    count,
+                    isDisable
+                }}
+                onComplete={handleComplete}
+                onSend={handleSend}
+            />
+        </Layout>
     );
 };
 

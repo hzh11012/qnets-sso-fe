@@ -1,10 +1,12 @@
-import { HttpClient } from '@/lib/request';
+import HttpClient from '@/lib/request';
 import type { ICode, ILogin } from '@/apis/models/auth-model';
 
+const prefix = '/auth';
+
 export const doCode = (params: ICode) => {
-    return HttpClient.post('/auth/api/sso/sms_code', { ...params });
+    return HttpClient.post(`${prefix}/api/sso/code`, { ...params });
 };
 
 export const doLogin = (params: ILogin) => {
-    return HttpClient.post('/auth/api/sso/sms_login', { ...params });
+    return HttpClient.post(`${prefix}/api/sso/login`, { ...params });
 };
