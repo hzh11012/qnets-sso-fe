@@ -39,14 +39,14 @@ class AxiosRequest {
                 const { code, msg } = response.data;
 
                 if (code !== 200) {
-                    toast(msg);
+                    toast.error(msg);
                     return Promise.reject(new Error(response.data));
                 }
 
                 return response.data;
             },
             error => {
-                toast(error.response.data.msg || '请求失败');
+                toast.error(error.response.data.msg || error.message || '请求失败');
                 return Promise.reject(error);
             }
         );

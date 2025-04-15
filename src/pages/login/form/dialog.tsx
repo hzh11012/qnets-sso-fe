@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -24,7 +24,11 @@ interface CodeDialogProps {
         count: number;
     };
     onOpenChange: (open: boolean) => void;
-    onComplete: (phone: string, code: string) => void;
+    onComplete: (
+        phone: string,
+        code: string,
+        setCode: (code: string) => void
+    ) => void;
     onSend: (phone: string) => void;
 }
 
@@ -37,9 +41,10 @@ const CodeDialog: React.FC<CodeDialogProps> = ({
     onSend
 }) => {
     const { count, isDisable } = countDown;
+    const [code, setCode] = useState('');
 
-    const handleComplete = (code: string) => {
-        onComplete && onComplete(phone, code);
+    const handleComplete = () => {
+        onComplete && onComplete(phone, code, setCode);
     };
 
     const handleClick = () => {
@@ -62,9 +67,11 @@ const CodeDialog: React.FC<CodeDialogProps> = ({
                 </DialogHeader>
                 <div className={cn('mx-auto my-7.5')}>
                     <InputOTP
+                        value={code}
                         maxLength={6}
                         pattern={REGEXP_ONLY_DIGITS}
                         onComplete={handleComplete}
+                        onChange={setCode}
                     >
                         <InputOTPGroup>
                             <div className={cn('flex w-full sm:gap-5')}>

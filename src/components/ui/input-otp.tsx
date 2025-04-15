@@ -57,11 +57,6 @@ function InputOTPSlot({
             {...props}
         >
             {char}
-            {hasFakeCaret && (
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                    <div className="animate-caret-blink bg-foreground h-4 w-px duration-1000" />
-                </div>
-            )}
         </div>
     );
 }
@@ -75,8 +70,3 @@ function InputOTPSeparator({ ...props }: React.ComponentProps<'div'>) {
 }
 
 export { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator };
-
-// className={cn(
-//     "border-input bg-background text-foreground flex size-9 items-center justify-center rounded-md border font-medium shadow-xs transition-[color,box-shadow]",
-//     { "border-ring ring-ring/50 z-10 ring-[3px]": props.isActive }
-//   )}

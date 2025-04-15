@@ -1,8 +1,12 @@
-import { LoaderCircle } from 'lucide-react';
+import RingLoader from 'react-spinners/RingLoader';
 
 import { cn } from '@/lib/utils';
 
-const Loading = ({ className }: any) => {
+interface loadingProps {
+    className?: string;
+}
+
+const Loading: React.FC<loadingProps> = ({ className }) => {
     return (
         <div
             className={cn(
@@ -10,8 +14,12 @@ const Loading = ({ className }: any) => {
                 className
             )}
         >
-            <LoaderCircle className={cn('h-4 w-4 animate-spin')} />
-            <p className={cn('text-sm ml-2')}>加载中</p>
+            <RingLoader
+                color="var(--theme)"
+                size={50}
+                aria-label="Loading Spinner"
+                data-testid="loader"
+            />
         </div>
     );
 };
