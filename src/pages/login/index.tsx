@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { cn } from '@/lib/utils';
@@ -16,70 +16,42 @@ import ThemeSwitch from '@/components/custom/theme-switch';
 import { phoneFormSchema } from '@/pages/login/form/schema';
 import { Button } from '@/components/ui/button';
 import { CodeDialog } from '@/pages/login/form/dialog';
-import { doCode, doLogin } from '@/apis/auth';
-import useCountDown from '@/hooks/use-count-down';
 import Loading from '@/components/custom/loading';
-import { useRequest } from 'ahooks';
 import { useSearchParams } from 'react-router-dom';
+import usePhoneAuth from '@/hooks/use-phone-auth';
 
 const DEFAULT_REDIRECT_URL = import.meta.env.VITE_DEFAULT_REDIRECT_URL;
 
 const Login: React.FC = () => {
-    const [open, setOpen] = useState(false);
-    const { start, count, isDisable } = useCountDown(60);
     const [searchParams] = useSearchParams();
-
-    const getQueryParam = (paramKey: string) => {
-        return searchParams.get(paramKey);
-    };
+    const {
+        dialogOpen,
+        setDialogOpen,
+        countDown,
+        loading,
+        onSendCode,
+        onLogin
+    } = usePhoneAuth();
 
     const phoneForm = useForm<Zod.infer<typeof phoneFormSchema>>({
         resolver: zodResolver(phoneFormSchema),
-        defaultValues: {
-            phone: ''
-        },
+        defaultValues: { phone: '' },
         mode: 'onSubmit',
         reValidateMode: 'onSubmit'
     });
 
     const phone = phoneForm.watch('phone');
-
-    const { runAsync: sendCode, loading } = useRequest(doCode, {
-        debounceWait: 300,
-        manual: true,
-        onSuccess: () => {
-            start();
-        }
-    });
+    const redirectUrl = searchParams.get('redirect') || DEFAULT_REDIRECT_URL;
 
     const handleClick = async (values: Zod.infer<typeof phoneFormSchema>) => {
-        const { phone } = values;
-        await sendCode({ phone });
-        setOpen(true);
+        await onSendCode(values.phone);
     };
 
-    const handleFocus = () => {
-        phoneForm.clearErrors();
-    };
-
-    const handleComplete = async (
-        phone: string,
-        code: string,
-        setCode: (code: string) => void
-    ) => {
-        try {
-            await doLogin({ phone, code });
-            const redirectUrl =
-                getQueryParam('redirect') || DEFAULT_REDIRECT_URL;
+    const handleComplete = async (phone: string, code: string) => {
+        const success = await onLogin(phone, code);
+        if (success) {
             window.location.href = redirectUrl;
-        } catch (error) {
-            // 清空验证码
-            setCode('');
         }
-    };
-
-    const handleSend = async (phone: string) => {
-        await sendCode({ phone });
     };
 
     return (
@@ -122,7 +94,10 @@ const Login: React.FC = () => {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className={cn('px-0')}>
-                        <PhoneForm form={phoneForm} onFocus={handleFocus} />
+                        <PhoneForm
+                            form={phoneForm}
+                            onFocus={() => phoneForm.clearErrors()}
+                        />
                     </CardContent>
                     <CardFooter className={cn('px-0 pt-6')}>
                         <Button
@@ -137,14 +112,11 @@ const Login: React.FC = () => {
                 </Card>
                 <CodeDialog
                     phone={phone}
-                    open={open}
-                    onOpenChange={setOpen}
-                    countDown={{
-                        count,
-                        isDisable
-                    }}
+                    open={dialogOpen}
+                    onOpenChange={setDialogOpen}
+                    countDown={countDown}
                     onComplete={handleComplete}
-                    onSend={handleSend}
+                    onSend={onSendCode}
                 />
             </Layout>
             {loading && <Loading />}

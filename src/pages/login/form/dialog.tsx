@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -24,11 +24,7 @@ interface CodeDialogProps {
         count: number;
     };
     onOpenChange: (open: boolean) => void;
-    onComplete: (
-        phone: string,
-        code: string,
-        setCode: (code: string) => void
-    ) => void;
+    onComplete: (phone: string, code: string) => Promise<void>;
     onSend: (phone: string) => void;
 }
 
@@ -43,13 +39,13 @@ const CodeDialog: React.FC<CodeDialogProps> = ({
     const { count, isDisable } = countDown;
     const [code, setCode] = useState('');
 
-    const handleComplete = () => {
-        onComplete && onComplete(phone, code, setCode);
-    };
+    const handleComplete = useCallback(async () => {
+        await onComplete(phone, code);
+    }, [phone, code, onComplete]);
 
-    const handleClick = () => {
-        onSend && onSend(phone);
-    };
+    const handleSendCode = useCallback(() => {
+        onSend(phone);
+    }, [phone, onSend]);
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -91,7 +87,7 @@ const CodeDialog: React.FC<CodeDialogProps> = ({
                 <DialogFooter className={cn('sm:justify-center')}>
                     <Button
                         className={cn('max-w-[18.75rem] w-full bg-theme')}
-                        onClick={handleClick}
+                        onClick={handleSendCode}
                         disabled={isDisable}
                     >
                         {isDisable ? `${count} 秒后可重新发送` : '发送验证码'}
