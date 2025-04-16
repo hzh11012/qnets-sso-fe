@@ -10,8 +10,8 @@ const Error = ({ className }: any) => {
                 className
             )}
         >
-            <CircleX className={cn('h-4 w-4')} />
-            <p className={cn('text-sm ml-2')}>出现错误</p>
+            <CircleX className={cn('size-5')} />
+            <p className={cn('ml-2')}>服务错误</p>
         </div>
     );
 };

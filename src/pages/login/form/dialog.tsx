@@ -24,7 +24,11 @@ interface CodeDialogProps {
         count: number;
     };
     onOpenChange: (open: boolean) => void;
-    onComplete: (phone: string, code: string) => Promise<void>;
+    onComplete: (
+        phone: string,
+        code: string,
+        setCode: (code: string) => void
+    ) => Promise<void>;
     onSend: (phone: string) => void;
 }
 
@@ -40,15 +44,20 @@ const CodeDialog: React.FC<CodeDialogProps> = ({
     const [code, setCode] = useState('');
 
     const handleComplete = useCallback(async () => {
-        await onComplete(phone, code);
+        await onComplete(phone, code, setCode);
     }, [phone, code, onComplete]);
 
     const handleSendCode = useCallback(() => {
         onSend(phone);
     }, [phone, onSend]);
 
+    const handleOpenChange = (open: boolean) => {
+        onOpenChange(open);
+        !open && setCode('');
+    };
+
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent
                 className={cn('w-[21.375rem] sm:w-full')}
                 closeClassName={cn('top-6.75')}

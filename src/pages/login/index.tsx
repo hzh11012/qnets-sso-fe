@@ -47,10 +47,16 @@ const Login: React.FC = () => {
         await onSendCode(values.phone);
     };
 
-    const handleComplete = async (phone: string, code: string) => {
+    const handleComplete = async (
+        phone: string,
+        code: string,
+        setCode: (code: string) => void
+    ) => {
         const success = await onLogin(phone, code);
         if (success) {
             window.location.href = redirectUrl;
+        } else {
+            setCode('');
         }
     };
 

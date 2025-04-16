@@ -9,6 +9,8 @@ const useCountDown = (initCount: number = 60) => {
     const [isDisable, setIsDisable] = useState(false);
 
     const start = () => {
+        // 每次调用前先清除定时器
+        clearInterval(timeId.current.id);
         setCount(initCount);
         setIsDisable(true);
         timeId.current.id = window.setInterval(() => {

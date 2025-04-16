@@ -10,13 +10,15 @@ const usePhoneAuth = () => {
     const { runAsync: sendCode, loading } = useRequest(doCode, {
         debounceWait: 300,
         manual: true,
-        onSuccess: () => {
-            start();
+        onSuccess: ({ code }) => {
+            if (code === 200) {
+                start();
+            }
         }
     });
 
     const handleSendCode = async (phone: string) => {
-        await sendCode({ phone });
+        !isDisable && (await sendCode({ phone }));
         setOpen(true);
     };
 
