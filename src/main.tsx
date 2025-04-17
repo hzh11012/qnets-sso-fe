@@ -17,7 +17,7 @@ createRoot(document.getElementById('root')!).render(
             disableTransitionOnChange
         >
             <RouterProvider router={router} />
-            <Toaster />
+            <Toaster position="top-right" />
         </ThemeProvider>
     </StrictMode>
 );
