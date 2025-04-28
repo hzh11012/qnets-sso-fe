@@ -7,28 +7,29 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { Phone } from 'lucide-react';
 import type { Control, FieldValues, Path } from 'react-hook-form';
 
-interface FormPhoneProps<TFieldValues extends FieldValues = FieldValues> {
+interface FormInputProps<TFieldValues extends FieldValues = FieldValues> {
     control: Control<TFieldValues>;
     name: Path<TFieldValues>;
     label?: string;
     required?: boolean;
+    startIcon?: React.ReactNode;
     placeholder?: string;
     maxLength?: number;
     onFocus?: () => void;
 }
 
-const FormPhone = <TFieldValues extends FieldValues>({
+const FormInput = <TFieldValues extends FieldValues>({
     control,
     name,
     label,
     required,
     placeholder,
+    startIcon,
     maxLength,
     onFocus
-}: FormPhoneProps<TFieldValues>) => {
+}: FormInputProps<TFieldValues>) => {
     const handleFocus = () => {
         onFocus && onFocus();
     };
@@ -49,9 +50,28 @@ const FormPhone = <TFieldValues extends FieldValues>({
                         </FormLabel>
                     )}
                     <FormControl>
-                        <div className={cn('relative')}>
+                        {startIcon ? (
+                            <div className={cn('relative')}>
+                                <Input
+                                    className={cn('peer ps-9')}
+                                    type="text"
+                                    autoComplete="off"
+                                    value={field.value}
+                                    maxLength={maxLength}
+                                    onChange={field.onChange}
+                                    placeholder={placeholder}
+                                    onFocus={handleFocus}
+                                />
+                                <div
+                                    className={cn(
+                                        'text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50'
+                                    )}
+                                >
+                                    {startIcon}
+                                </div>
+                            </div>
+                        ) : (
                             <Input
-                                className={cn('peer ps-9')}
                                 type="text"
                                 autoComplete="off"
                                 value={field.value}
@@ -60,14 +80,7 @@ const FormPhone = <TFieldValues extends FieldValues>({
                                 placeholder={placeholder}
                                 onFocus={handleFocus}
                             />
-                            <div
-                                className={cn(
-                                    'text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50'
-                                )}
-                            >
-                                <Phone size={16} aria-hidden="true" />
-                            </div>
-                        </div>
+                        )}
                     </FormControl>
                     <FormMessage />
                 </FormItem>
@@ -76,4 +89,4 @@ const FormPhone = <TFieldValues extends FieldValues>({
     );
 };
 
-export default FormPhone;
+export default FormInput;

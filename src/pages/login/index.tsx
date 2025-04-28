@@ -11,14 +11,14 @@ import {
     CardHeader,
     CardTitle
 } from '@/components/ui/card';
-import { PhoneForm } from '@/pages/login/form';
+import { EmailForm } from '@/pages/login/form';
 import ThemeSwitch from '@/components/custom/theme-switch';
-import { phoneFormSchema } from '@/pages/login/form/schema';
+import { emailFormSchema } from '@/pages/login/form/schema';
 import { Button } from '@/components/ui/button';
 import { CodeDialog } from '@/pages/login/form/dialog';
 import Loading from '@/components/custom/loading';
 import { useSearchParams } from 'react-router-dom';
-import usePhoneAuth from '@/hooks/use-phone-auth';
+import useLoginAuth from '@/hooks/use-login-auth';
 
 const DEFAULT_REDIRECT_URL = import.meta.env.VITE_DEFAULT_REDIRECT_URL;
 
@@ -31,28 +31,28 @@ const Login: React.FC = () => {
         loading,
         onSendCode,
         onLogin
-    } = usePhoneAuth();
+    } = useLoginAuth();
 
-    const phoneForm = useForm<Zod.infer<typeof phoneFormSchema>>({
-        resolver: zodResolver(phoneFormSchema),
-        defaultValues: { phone: '' },
+    const emailForm = useForm<Zod.infer<typeof emailFormSchema>>({
+        resolver: zodResolver(emailFormSchema),
+        defaultValues: { email: '' },
         mode: 'onSubmit',
         reValidateMode: 'onSubmit'
     });
 
-    const phone = phoneForm.watch('phone');
+    const email = emailForm.watch('email');
     const redirectUrl = searchParams.get('redirect') || DEFAULT_REDIRECT_URL;
 
-    const handleClick = async (values: Zod.infer<typeof phoneFormSchema>) => {
-        await onSendCode(values.phone);
+    const handleClick = async (values: Zod.infer<typeof emailFormSchema>) => {
+        await onSendCode(values.email);
     };
 
     const handleComplete = async (
-        phone: string,
+        email: string,
         code: string,
         setCode: (code: string) => void
     ) => {
-        const success = await onLogin(phone, code);
+        const success = await onLogin(email, code);
         if (success) {
             window.location.href = redirectUrl;
         } else {
@@ -91,7 +91,7 @@ const Login: React.FC = () => {
                             <ThemeSwitch />
                         </CardTitle>
                         <CardTitle className={cn('text-[1.125rem] mx-2')}>
-                            手机号登录/注册
+                            邮箱登录/注册
                         </CardTitle>
                         <CardDescription
                             className={cn('text-[0.875rem] mx-2 mt-3 mb-4')}
@@ -100,24 +100,24 @@ const Login: React.FC = () => {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className={cn('px-0')}>
-                        <PhoneForm
-                            form={phoneForm}
-                            onFocus={() => phoneForm.clearErrors()}
+                        <EmailForm
+                            form={emailForm}
+                            onFocus={() => emailForm.clearErrors()}
                         />
                     </CardContent>
                     <CardFooter className={cn('px-0 pt-6')}>
                         <Button
                             className={cn('w-full mt-4 bg-theme')}
                             type="submit"
-                            disabled={!phone}
-                            onClick={phoneForm.handleSubmit(handleClick)}
+                            disabled={!email}
+                            onClick={emailForm.handleSubmit(handleClick)}
                         >
                             登录
                         </Button>
                     </CardFooter>
                 </Card>
                 <CodeDialog
-                    phone={phone}
+                    email={email}
                     open={dialogOpen}
                     onOpenChange={setDialogOpen}
                     countDown={countDown}

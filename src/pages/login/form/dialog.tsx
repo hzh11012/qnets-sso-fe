@@ -17,7 +17,7 @@ import { REGEXP_ONLY_DIGITS } from 'input-otp';
 import { Button } from '@/components/ui/button';
 
 interface CodeDialogProps {
-    phone: string;
+    email: string;
     open: boolean;
     countDown: {
         isDisable: boolean;
@@ -25,17 +25,17 @@ interface CodeDialogProps {
     };
     onOpenChange: (open: boolean) => void;
     onComplete: (
-        phone: string,
+        email: string,
         code: string,
         setCode: (code: string) => void
     ) => Promise<void>;
-    onSend: (phone: string) => void;
+    onSend: (email: string) => void;
 }
 
 const CodeDialog: React.FC<CodeDialogProps> = ({
     open,
     onOpenChange,
-    phone,
+    email,
     countDown,
     onComplete,
     onSend
@@ -44,12 +44,12 @@ const CodeDialog: React.FC<CodeDialogProps> = ({
     const [code, setCode] = useState('');
 
     const handleComplete = useCallback(async () => {
-        await onComplete(phone, code, setCode);
-    }, [phone, code, onComplete]);
+        await onComplete(email, code, setCode);
+    }, [email, code, onComplete]);
 
     const handleSendCode = useCallback(() => {
-        onSend(phone);
-    }, [phone, onSend]);
+        onSend(email);
+    }, [email, onSend]);
 
     const handleOpenChange = (open: boolean) => {
         onOpenChange(open);
@@ -67,7 +67,7 @@ const CodeDialog: React.FC<CodeDialogProps> = ({
                         请输入验证码
                     </DialogTitle>
                     <DialogDescription>
-                        短信验证码已发送至 +86 {phone}
+                        邮箱验证码已发送至 {email}
                     </DialogDescription>
                 </DialogHeader>
                 <div className={cn('mx-auto my-7.5')}>

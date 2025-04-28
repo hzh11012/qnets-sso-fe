@@ -3,7 +3,7 @@ import { useRequest } from 'ahooks';
 import { doCode, doLogin } from '@/apis/auth';
 import useCountDown from '@/hooks/use-count-down';
 
-const usePhoneAuth = () => {
+const useLoginAuth = () => {
     const [open, setOpen] = useState(false);
     const { start, count, isDisable } = useCountDown(60);
 
@@ -17,14 +17,14 @@ const usePhoneAuth = () => {
         }
     });
 
-    const handleSendCode = async (phone: string) => {
-        !isDisable && (await sendCode({ phone }));
+    const handleSendCode = async (email: string) => {
+        !isDisable && (await sendCode({ email }));
         setOpen(true);
     };
 
-    const handleLogin = async (phone: string, code: string) => {
+    const handleLogin = async (email: string, code: string) => {
         try {
-            await doLogin({ phone, code });
+            await doLogin({ email, code });
             return true;
         } catch (error) {
             return false;
@@ -41,4 +41,4 @@ const usePhoneAuth = () => {
     };
 };
 
-export default usePhoneAuth;
+export default useLoginAuth;

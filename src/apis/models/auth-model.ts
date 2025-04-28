@@ -1,5 +1,5 @@
 export interface ICode {
-    phone: string;
+    email: string;
 }
 
 export interface ILogin extends ICode {

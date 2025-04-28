@@ -1,26 +1,28 @@
 import React from 'react';
 import { Form } from '@/components/ui/form';
-import { phoneFormSchema } from '@/pages/login/form/schema';
+import { emailFormSchema } from '@/pages/login/form/schema';
 import { UseFormReturn } from 'react-hook-form';
-import FormPhone from '@/components/custom/form/form-phone';
+import FormInput from '@/components/custom/form/form-input';
+import { Mail } from 'lucide-react';
 
-interface PhoneFormProps {
-    form: UseFormReturn<Zod.infer<typeof phoneFormSchema>>;
+interface EmailFormProps {
+    form: UseFormReturn<Zod.infer<typeof emailFormSchema>>;
     onFocus?: () => void;
 }
 
-const PhoneForm: React.FC<PhoneFormProps> = ({ form, onFocus }) => {
+const EmailForm: React.FC<EmailFormProps> = ({ form, onFocus }) => {
     return (
         <Form {...form}>
-            <FormPhone
+            <FormInput
                 control={form.control}
-                name="phone"
-                placeholder={'+86'}
-                maxLength={11}
+                name="email"
+                placeholder={'请输入邮箱'}
+                maxLength={255}
                 onFocus={onFocus}
+                startIcon={<Mail size={16} aria-hidden="true" />}
             />
         </Form>
     );
 };
 
-export { PhoneForm };
+export { EmailForm };
